@@ -37,6 +37,7 @@ class DetailPassportPage extends StatelessWidget {
     final bool hasCritical = penyakitKritis.toLowerCase() != "tidak ada" && penyakitKritis.isNotEmpty;
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: const Color(0xfff3f4f6),
       body: Column(
         children: [
@@ -321,11 +322,66 @@ class DetailPassportPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 110),
               ],
             ),
           )
         ],
       ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        color: Colors.white,
+        elevation: 15,
+        child: Container(
+          height: 60,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.home_rounded,
+                  size: 28,
+                  color: Colors.blueAccent,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(width: 40),
+              IconButton(
+                icon: Icon(
+                  Icons.person_rounded,
+                  size: 28,
+                  color: Colors.grey.shade400,
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 64,
+        height: 64,
+        child: FloatingActionButton(
+          backgroundColor: Colors.blueAccent,
+          shape: const CircleBorder(),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          elevation: 4,
+          child: const Icon(
+            Icons.qr_code_scanner,
+            color: Colors.white,
+            size: 30,
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 

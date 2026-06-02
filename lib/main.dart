@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'screens/auth_page.dart';
-import 'pages/settings.dart';
-import 'pages/settings_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,8 +18,6 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.blueAccent,
       ),
       home: const AuthPage(),
-      // home: const PengaturanScreen(),
-      // home: const SettingsPage(),
     );
   }
 }

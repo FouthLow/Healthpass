@@ -27,7 +27,7 @@ class _AuthPageState extends State<AuthPage> {
   final _nameEmailBpjsController = TextEditingController();
   String _completePhoneNumber = '';
 
-  final String baseUrl = "https://pelican-reword-affection.ngrok-free.dev";
+  final String baseUrl = "http://127.0.0.1:8000";
 
   @override
   void dispose() {

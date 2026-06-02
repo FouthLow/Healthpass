@@ -34,7 +34,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  final String baseUrl = "https://pelican-reword-affection.ngrok-free.dev";
+  final String baseUrl = "http://127.0.0.1:8000";
 
   @override
   void initState() {

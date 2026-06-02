@@ -18,7 +18,7 @@ class _HospitalListPageState extends State<HospitalListPage> {
   // 1. DATA DUMMY DIHAPUS TOTAL! Sekarang diganti list kosong untuk menampung data asli server
   List<dynamic> _realHospitals = [];
   bool _isLoading = false;
-  final String baseUrl = "https://pelican-reword-affection.ngrok-free.dev"; 
+  final String baseUrl = "http://127.0.0.1:8000"; 
 
   @override
   void initState() {

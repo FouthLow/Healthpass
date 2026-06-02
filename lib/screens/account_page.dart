@@ -114,6 +114,182 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
+  void _showEditProfileDialog() {
+    final TextEditingController emailController = TextEditingController(text: _email);
+    final TextEditingController passwordController = TextEditingController();
+    final TextEditingController confirmPasswordController = TextEditingController();
+    bool isSaving = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Row(
+                children: [
+                  Icon(Icons.manage_accounts_rounded, color: Colors.blueAccent),
+                  SizedBox(width: 8),
+                  Text("Ubah Email & Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Perbarui informasi email dan password akun Anda di bawah ini:",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Email Baru", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: "Masukkan email...",
+                        prefixIcon: const Icon(Icons.email_outlined, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Password Baru (Kosongkan jika tidak diubah)", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      style: const TextStyle(fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: "Minimal 8 karakter...",
+                        prefixIcon: const Icon(Icons.lock_outline, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text("Konfirmasi Password Baru", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: confirmPasswordController,
+                      obscureText: true,
+                      style: const TextStyle(fontSize: 13),
+                      decoration: InputDecoration(
+                        hintText: "Ketik ulang password baru...",
+                        prefixIcon: const Icon(Icons.lock_clock_outlined, size: 18),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSaving ? null : () => Navigator.pop(context),
+                  child: const Text("Batal", style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  onPressed: isSaving
+                      ? null
+                      : () async {
+                          final email = emailController.text.trim();
+                          final password = passwordController.text;
+                          final confirmPassword = confirmPasswordController.text;
+
+                          if (email.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Email tidak boleh kosong.')),
+                            );
+                            return;
+                          }
+
+                          if (password.isNotEmpty) {
+                            if (password.length < 8) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Password baru minimal 8 karakter.')),
+                              );
+                              return;
+                            }
+                            if (password != confirmPassword) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Konfirmasi password tidak cocok.')),
+                              );
+                              return;
+                            }
+                          }
+
+                          setDialogState(() {
+                            isSaving = true;
+                          });
+
+                          try {
+                            final response = await http.post(
+                              Uri.parse("$baseUrl/api/pasien/profile/update"),
+                              headers: {
+                                "Content-Type": "application/json",
+                                "Accept": "application/json",
+                                "Authorization": "Bearer ${widget.token}",
+                                "ngrok-skip-browser-warning": "69420",
+                              },
+                              body: jsonEncode({
+                                "email": email,
+                                if (password.isNotEmpty) "password": password,
+                              }),
+                            );
+
+                            final body = jsonDecode(response.body);
+
+                            if (response.statusCode == 200) {
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Profil berhasil diperbarui!')),
+                              );
+                              _fetchProfile();
+                            } else {
+                              String errMsg = body["message"] ?? "Gagal menyimpan perubahan.";
+                              if (body["errors"] != null && body["errors"] is Map) {
+                                errMsg += "\n" + (body["errors"] as Map).values.expand((v) => v as List).join("\n");
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(errMsg)),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Kesalahan koneksi: $e')),
+                            );
+                          } finally {
+                            setDialogState(() {
+                              isSaving = false;
+                            });
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: isSaving
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text("Simpan", style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -271,6 +447,45 @@ class _AccountPageState extends State<AccountPage> {
               ),
 
               const SizedBox(height: 24),
+
+              // --- TOMBOL UBAH AKUN ---
+              InkWell(
+                onTap: _showEditProfileDialog,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.blueAccent.withOpacity(0.3),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.edit_note_rounded,
+                        color: Colors.blueAccent,
+                        size: 22,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Ubah Email & Password',
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
 
               // --- TOMBOL KELUAR ---
               InkWell(

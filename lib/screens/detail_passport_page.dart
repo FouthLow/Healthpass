@@ -57,28 +57,39 @@ class DetailPassportPage extends StatelessWidget {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
                       children: [
-                        const Text("Passport Kesehatan", style: TextStyle(color: Colors.white, fontSize: 14)),
-                        const SizedBox(height: 4),
-                        Text(
-                          nama,
-                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text("Passport Kesehatan", style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 2),
+                            Text(
+                              nama,
+                              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 36,
+                      height: 36,
                       decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
                       child: const Center(
-                        child: Icon(Icons.bookmark, color: Color(0xfffbbf24), size: 20),
+                        child: Icon(Icons.bookmark, color: Color(0xfffbbf24), size: 18),
                       ),
                     ),
                   ],

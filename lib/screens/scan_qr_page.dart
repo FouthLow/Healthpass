@@ -28,7 +28,7 @@ class _ScanQrPageState extends State<ScanQrPage> {
     super.dispose();
   }
 
-  // Melakukan post verifikasi ke backend Laravel
+  // verify qr code
   Future<void> _verifyQrString(String qrString) async {
     if (_isProcessing) return;
 
@@ -36,23 +36,23 @@ class _ScanQrPageState extends State<ScanQrPage> {
       _isProcessing = true;
     });
 
-    // Hentikan pemindaian kamera saat memproses
+    // stop camera
     _scannerController.stop();
 
     final Uri url = Uri.parse("$baseUrl/api/pasien/qr/verify-scan");
 
     try {
       final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": "Bearer ${widget.token}",
-          "ngrok-skip-browser-warning": "69420",
-        },
-        body: jsonEncode({
-          "qr_encrypted_string": qrString,
-        }),
+          url,
+          headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": "Bearer ${widget.token}",
+            "ngrok-skip-browser-warning": "69420",
+          },
+          body: jsonEncode({
+            "qr_encrypted_string": qrString,
+          }),
       );
 
       final responseData = jsonDecode(response.body);
@@ -75,7 +75,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
           );
         }
       } else {
-        // Penanganan error response (seperti QR tidak valid)
         String errMsg = responseData["message"] ?? "QR Code tidak dikenali atau tidak valid.";
         _showResultDialog(
           isSuccess: false,
@@ -96,7 +95,7 @@ class _ScanQrPageState extends State<ScanQrPage> {
     }
   }
 
-  // Dialog Output Hasil Verifikasi yang Indah dan Premium
+  // show dialog
   void _showResultDialog({
     required bool isSuccess,
     required String title,
@@ -113,7 +112,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Icon Status Bulat dengan Animasi
               Container(
                 width: 72,
                 height: 72,
@@ -128,7 +126,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              // Judul Dialog
               Text(
                 title,
                 textAlign: TextAlign.center,
@@ -139,14 +136,12 @@ class _ScanQrPageState extends State<ScanQrPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Keterangan Message
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: Color(0xff64748b), height: 1.4),
               ),
               
-              // Tampilkan daftar alasan jika gagal
               if (details != null && details.isNotEmpty) ...[
                 const SizedBox(height: 16),
                 Container(
@@ -189,13 +184,11 @@ class _ScanQrPageState extends State<ScanQrPage> {
               
               const SizedBox(height: 24),
               
-              // Tombol Tutup Dialog
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    // Mulai pemindaian kamera kembali
                     _scannerController.start();
                   },
                   style: ElevatedButton.styleFrom(
@@ -214,7 +207,7 @@ class _ScanQrPageState extends State<ScanQrPage> {
     );
   }
 
-  // Membuka modal input manual untuk mempermudah testing emulator
+  // input manual
   void _openManualInputDialog() {
     final TextEditingController inputController = TextEditingController();
     showDialog(
@@ -281,7 +274,7 @@ class _ScanQrPageState extends State<ScanQrPage> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 1. Kamera Scanner Viewfinder
+          // viewfinder
           MobileScanner(
             controller: _scannerController,
             onDetect: (capture) {
@@ -293,7 +286,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
             },
           ),
 
-          // 2. Viewfinder Overlay Kustom (Efek gelap di luar kotak bidik)
           ColorFiltered(
             colorFilter: ColorFilter.mode(
               Colors.black.withOpacity(0.5),
@@ -318,7 +310,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
             ),
           ),
 
-          // 3. Garis Frame Pinggiran Kotak Bidik
           Center(
             child: Container(
               width: 250,
@@ -330,7 +321,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
             ),
           ),
 
-          // 4. Header & Panduan Pemindaian
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -357,7 +347,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
                           ],
                         ),
                       ),
-                      // Flash Toggle Button
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.6),
@@ -383,7 +372,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
                     ],
                   ),
                   const Spacer(),
-                  // Teks panduan di bawah kotak bidik
                   Center(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -400,7 +388,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
                   ),
                   const SizedBox(height: 24),
                   
-                  // Tombol Input Manual Fallback untuk testing emulator
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: _openManualInputDialog,
@@ -420,7 +407,6 @@ class _ScanQrPageState extends State<ScanQrPage> {
             ),
           ),
 
-          // 5. Spinner Loading saat Memproses Data ke Backend
           if (_isProcessing)
             Container(
               color: Colors.black54,

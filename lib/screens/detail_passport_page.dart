@@ -12,32 +12,26 @@ class DetailPassportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mengekstrak data dari Map API
     final String nama = passportData['patient_name'] ?? "Ahmad F. Ahla";
     final String statusKesehatan = passportData['medical_status'] ?? "Sembuh Total";
     final String golDarah = passportData['blood_type'] ?? "-";
     final String penyakitKritis = passportData['critical_diseases'] ?? "Tidak ada";
     
-    // Menggabungkan alergi obat dan makanan
     final String alergiObat = passportData['drug_allergies'] ?? "";
     final String alergiMakanan = passportData['food_allergies'] ?? "";
     final List<String> listAlergi = [];
     if (alergiObat.isNotEmpty && alergiObat != "Tidak ada") listAlergi.add(alergiObat);
     if (alergiMakanan.isNotEmpty && alergiMakanan != "Tidak ada") listAlergi.add(alergiMakanan);
 
-    // Disabilitas
     final List<dynamic> disabilitasRaw = passportData['disabilities'] ?? [];
     final String disabilitas = disabilitasRaw.isNotEmpty ? disabilitasRaw.join(", ") : "Tidak ada";
 
-    // Tinggi & Berat Badan
     final String tinggiBadan = passportData['height_cm'] != null ? "${passportData['height_cm']} cm" : "-";
     final String beratBadan = passportData['weight_kg'] != null ? "${passportData['weight_kg']} kg" : "-";
 
-    // Kontak Darurat
     final String kontakNama = passportData['emergency_contact_name'] ?? "-";
     final String kontakTelp = passportData['emergency_contact_phone'] ?? "-";
 
-    // Status Logika Badge
     final bool hasDisability = disabilitasRaw.isNotEmpty;
     final bool hasCritical = penyakitKritis.toLowerCase() != "tidak ada" && penyakitKritis.isNotEmpty;
 
@@ -95,9 +89,6 @@ class DetailPassportPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // ==========================================
-          // HEADER KELAYAKAN MEDIS (Bawah AppBar)
-          // ==========================================
           Container(
             width: double.infinity,
             padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24, top: 12),
@@ -147,18 +138,13 @@ class DetailPassportPage extends StatelessWidget {
             ),
           ),
 
-          // ==========================================
-          // KONTEN KARTU DETAIL
-          // ==========================================
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                // Baris Pertama: Gol Darah & Alergi
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Kartu Gol Darah
                     Expanded(
                       flex: 1,
                       child: _buildStatCard(
@@ -171,7 +157,6 @@ class DetailPassportPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    // Kartu Alergi
                     Expanded(
                       flex: 1,
                       child: _buildStatCard(
@@ -200,7 +185,6 @@ class DetailPassportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 
-                // Kartu Disabilitas
                 _buildStatCard(
                   title: "Disabilitas",
                   subtitle: "Tanggal pemeriksaan: Terbaru",
@@ -234,7 +218,6 @@ class DetailPassportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Kartu Penyakit Kritis
                 _buildStatCard(
                   title: "Penyakit Kritis",
                   subtitle: "Tanggal pemeriksaan: Terbaru",
@@ -268,7 +251,6 @@ class DetailPassportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Kartu Tinggi & Berat Badan
                 Row(
                   children: [
                     Expanded(
@@ -296,7 +278,6 @@ class DetailPassportPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Kartu Kontak Darurat
                 _buildStatCard(
                   title: "Kontak Darurat",
                   subtitle: "Gunakan bila dalam kondisi mendesak",
@@ -398,7 +379,6 @@ class DetailPassportPage extends StatelessWidget {
     );
   }
 
-  // Fungsi helper pembangun Card agar kode tidak berulang-ulang
   Widget _buildStatCard({
     required String title,
     required String subtitle,

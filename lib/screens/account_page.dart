@@ -71,7 +71,7 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Future<void> _handleLogout() async {
-    // Tampilkan dialog konfirmasi
+    // confirm logout
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -342,7 +342,6 @@ class _AccountPageState extends State<AccountPage> {
             children: [
               const SizedBox(height: 32),
 
-              // --- KARTU PROFIL USER ---
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
@@ -370,14 +369,13 @@ class _AccountPageState extends State<AccountPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Badge Nomor BPJS
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE3F2FD), // Biru muda transparan
+                        color: const Color(0xFFE3F2FD),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Row(
@@ -392,7 +390,7 @@ class _AccountPageState extends State<AccountPage> {
                           Text(
                             'No. BPJS: $_noBpjs',
                             style: const TextStyle(
-                              color: Color(0xFF1E88E5), // Biru tegas
+                              color: Color(0xFF1E88E5),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -416,7 +414,6 @@ class _AccountPageState extends State<AccountPage> {
               ),
               const SizedBox(height: 12),
 
-              // --- KOTAK DETAIL DATA PROFIL ---
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -448,7 +445,6 @@ class _AccountPageState extends State<AccountPage> {
 
               const SizedBox(height: 24),
 
-              // --- TOMBOL UBAH AKUN ---
               InkWell(
                 onTap: _showEditProfileDialog,
                 borderRadius: BorderRadius.circular(16),
@@ -487,7 +483,6 @@ class _AccountPageState extends State<AccountPage> {
 
               const SizedBox(height: 16),
 
-              // --- TOMBOL KELUAR ---
               InkWell(
                 onTap: _handleLogout,
                 borderRadius: BorderRadius.circular(16),
@@ -526,7 +521,6 @@ class _AccountPageState extends State<AccountPage> {
 
               const SizedBox(height: 40),
 
-              // --- FOOTER PRIVASI ---
               const Center(
                 child: Padding(
                   padding: EdgeInsets.only(bottom: 24.0),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../screens/dashboard_page.dart';
-import '../screens/scan_qr_page.dart'; // 🟢 Mengarah ke halaman scan asli
-import '../screens/account_page.dart'; // 🟢 Mengarah ke halaman akun asli
+import '../screens/scan_qr_page.dart';
+import '../screens/account_page.dart';
 
 class MainNavigation extends StatefulWidget {
   final String token;
@@ -19,7 +19,6 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // Menghubungkan token ke masing-masing page asli
     _pages = [
       DashboardPage(
         token: widget.token,

@@ -21,7 +21,14 @@ class _MainNavigationState extends State<MainNavigation> {
     super.initState();
     // Menghubungkan token ke masing-masing page asli
     _pages = [
-      DashboardPage(token: widget.token),
+      DashboardPage(
+        token: widget.token,
+        onTabChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+      ),
       ScanQrPage(token: widget.token),
       AccountPage(token: widget.token),
     ];

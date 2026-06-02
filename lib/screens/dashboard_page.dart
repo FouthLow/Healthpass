@@ -7,10 +7,12 @@ import 'hospital_list_page.dart';
 
 class DashboardPage extends StatefulWidget {
   final String token;
+  final Function(int)? onTabChanged;
 
   const DashboardPage({
     super.key,
     required this.token,
+    this.onTabChanged,
   });
 
   @override
@@ -725,7 +727,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DetailPassportPage(passportData: passport!), 
+                            builder: (context) => DetailPassportPage(
+                              passportData: passport!,
+                              onTabChanged: widget.onTabChanged,
+                            ), 
                           ),
                         );
                       } else {

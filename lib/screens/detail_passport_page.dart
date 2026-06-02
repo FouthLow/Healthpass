@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class DetailPassportPage extends StatelessWidget {
   final Map<String, dynamic> passportData;
+  final Function(int)? onTabChanged;
 
-  const DetailPassportPage({super.key, required this.passportData});
+  const DetailPassportPage({
+    super.key,
+    required this.passportData,
+    this.onTabChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +44,63 @@ class DetailPassportPage extends StatelessWidget {
     return Scaffold(
       extendBody: true,
       backgroundColor: const Color(0xfff3f4f6),
+      appBar: AppBar(
+        backgroundColor: const Color(0xff3b82f6),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: 0,
+        title: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Passport Kesehatan", style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 2),
+                      Text(
+                        nama,
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Icon(Icons.bookmark, color: Color(0xfffbbf24), size: 18),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Column(
         children: [
           // ==========================================
-          // HEADER BIRU
+          // HEADER KELAYAKAN MEDIS (Bawah AppBar)
           // ==========================================
           Container(
-            padding: const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 24),
+            width: double.infinity,
+            padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24, top: 12),
             decoration: const BoxDecoration(
               color: Color(0xff3b82f6),
               borderRadius: BorderRadius.only(
@@ -53,86 +108,41 @@ class DetailPassportPage extends StatelessWidget {
                 bottomRight: Radius.circular(24),
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-                          onPressed: () => Navigator.pop(context),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Passport Kesehatan", style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500)),
-                            const SizedBox(height: 2),
-                            Text(
-                              nama,
-                              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.bookmark, color: Color(0xfffbbf24), size: 18),
-                      ),
-                    ),
-                  ],
+                Container(
+                  width: 32,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: Colors.red,
+                  ),
+                  child: Column(
+                    children: [
+                      Expanded(child: Container(color: Colors.red)),
+                      Expanded(child: Container(color: Colors.white)),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 20),
-                Row(
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Text("Ringkasan kesehatan", style: TextStyle(color: Colors.white, fontSize: 12)),
+                    const SizedBox(height: 4),
                     Container(
-                      width: 32,
-                      height: 24,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(4),
-                        color: Colors.red,
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Column(
-                        children: [
-                          Expanded(child: Container(color: Colors.red)),
-                          Expanded(child: Container(color: Colors.white)),
-                        ],
+                      child: Text(
+                        statusKesehatan.toUpperCase(),
+                        style: const TextStyle(color: Color(0xff16a34a), fontSize: 10, fontWeight: FontWeight.bold),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text("Ringkasan kesehatan", style: TextStyle(color: Colors.white, fontSize: 12)),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            statusKesehatan.toUpperCase(),
-                            style: const TextStyle(color: Color(0xff16a34a), fontSize: 10, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    )
                   ],
-                ),
+                )
               ],
             ),
           ),
@@ -346,6 +356,7 @@ class DetailPassportPage extends StatelessWidget {
                   color: Colors.blueAccent,
                 ),
                 onPressed: () {
+                  onTabChanged?.call(0);
                   Navigator.pop(context);
                 },
               ),
@@ -357,6 +368,7 @@ class DetailPassportPage extends StatelessWidget {
                   color: Colors.grey.shade400,
                 ),
                 onPressed: () {
+                  onTabChanged?.call(2);
                   Navigator.pop(context);
                 },
               ),
@@ -371,6 +383,7 @@ class DetailPassportPage extends StatelessWidget {
           backgroundColor: Colors.blueAccent,
           shape: const CircleBorder(),
           onPressed: () {
+            onTabChanged?.call(1);
             Navigator.pop(context);
           },
           elevation: 4,

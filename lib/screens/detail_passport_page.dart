@@ -13,7 +13,7 @@ class DetailPassportPage extends StatelessWidget {
     final String golDarah = passportData['blood_type'] ?? "-";
     final String penyakitKritis = passportData['critical_diseases'] ?? "Tidak ada";
     
-    // Menggabungkan alergi obat dan makanan (bisa disesuaikan jika bentuknya array/list)
+    // Menggabungkan alergi obat dan makanan
     final String alergiObat = passportData['drug_allergies'] ?? "";
     final String alergiMakanan = passportData['food_allergies'] ?? "";
     final List<String> listAlergi = [];
@@ -22,10 +22,22 @@ class DetailPassportPage extends StatelessWidget {
 
     // Disabilitas
     final List<dynamic> disabilitasRaw = passportData['disabilities'] ?? [];
-    final String disabilitas = disabilitasRaw.isNotEmpty ? disabilitasRaw.join(", ") : "Aman";
+    final String disabilitas = disabilitasRaw.isNotEmpty ? disabilitasRaw.join(", ") : "Tidak ada";
+
+    // Tinggi & Berat Badan
+    final String tinggiBadan = passportData['height_cm'] != null ? "${passportData['height_cm']} cm" : "-";
+    final String beratBadan = passportData['weight_kg'] != null ? "${passportData['weight_kg']} kg" : "-";
+
+    // Kontak Darurat
+    final String kontakNama = passportData['emergency_contact_name'] ?? "-";
+    final String kontakTelp = passportData['emergency_contact_phone'] ?? "-";
+
+    // Status Logika Badge
+    final bool hasDisability = disabilitasRaw.isNotEmpty;
+    final bool hasCritical = penyakitKritis.toLowerCase() != "tidak ada" && penyakitKritis.isNotEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xfff3f4f6), // Warna abu-abu terang background
+      backgroundColor: const Color(0xfff3f4f6),
       body: Column(
         children: [
           // ==========================================
@@ -58,7 +70,6 @@ class DetailPassportPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // Icon Pita Bulat Kanan Atas
                     Container(
                       width: 40,
                       height: 40,
@@ -75,7 +86,6 @@ class DetailPassportPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    // Bendera Indonesia Dummy
                     Container(
                       width: 32,
                       height: 24,
@@ -103,7 +113,7 @@ class DetailPassportPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            statusKesehatan,
+                            statusKesehatan.toUpperCase(),
                             style: const TextStyle(color: Color(0xff16a34a), fontSize: 10, fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -116,7 +126,7 @@ class DetailPassportPage extends StatelessWidget {
           ),
 
           // ==========================================
-          // KONTEN KARTU STATISTIK
+          // KONTEN KARTU DETAIL
           // ==========================================
           Expanded(
             child: ListView(
@@ -131,7 +141,7 @@ class DetailPassportPage extends StatelessWidget {
                       flex: 1,
                       child: _buildStatCard(
                         title: "Gol darah",
-                        subtitle: "Tanggal pemeriksaan:\nTerbaru",
+                        subtitle: "Tanggal pemeriksaan: Terbaru",
                         content: Text(
                           golDarah,
                           style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
@@ -146,7 +156,7 @@ class DetailPassportPage extends StatelessWidget {
                         title: "Alergi",
                         subtitle: "Obat dan lainnya",
                         content: listAlergi.isEmpty
-                            ? const Text("Tidak ada alergi", style: TextStyle(color: Colors.grey))
+                            ? const Text("Tidak ada alergi", style: TextStyle(color: Colors.grey, fontSize: 13))
                             : Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
@@ -158,7 +168,7 @@ class DetailPassportPage extends StatelessWidget {
                                       ),
                                       child: Text(
                                         alergi,
-                                        style: const TextStyle(color: Color(0xff3b82f6), fontSize: 12, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(color: Color(0xff3b82f6), fontSize: 11, fontWeight: FontWeight.bold),
                                       ),
                                     )).toList(),
                               ),
@@ -170,19 +180,32 @@ class DetailPassportPage extends StatelessWidget {
                 
                 // Kartu Disabilitas
                 _buildStatCard(
-                  title: "Dissabilitas",
+                  title: "Disabilitas",
                   subtitle: "Tanggal pemeriksaan: Terbaru",
                   titleWidget: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(disabilitas, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xff1e293b))),
+                      Expanded(
+                        child: Text(
+                          disabilitas, 
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xffe0f2fe),
+                          color: hasDisability ? const Color(0xfffee2e2) : const Color(0xffdcfce7),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text("Aman", style: TextStyle(color: Color(0xff3b82f6), fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          hasDisability ? "Perlu Perhatian" : "Aman",
+                          style: TextStyle(
+                            color: hasDisability ? const Color(0xffdc2626) : const Color(0xff16a34a),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       )
                     ],
                   ),
@@ -196,15 +219,94 @@ class DetailPassportPage extends StatelessWidget {
                   titleWidget: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(penyakitKritis, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xff1e293b))),
+                      Expanded(
+                        child: Text(
+                          penyakitKritis,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: const Color(0xfffef3c7),
+                          color: hasCritical ? const Color(0xfffee2e2) : const Color(0xffdcfce7),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text("Perlu pengawasan", style: TextStyle(color: Color(0xffd97706), fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          hasCritical ? "Perlu Pengawasan" : "Aman",
+                          style: TextStyle(
+                            color: hasCritical ? const Color(0xffdc2626) : const Color(0xff16a34a),
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       )
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Kartu Tinggi & Berat Badan
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildStatCard(
+                        title: "Tinggi Badan",
+                        subtitle: "Hasil pengukuran fisik",
+                        content: Text(
+                          tinggiBadan,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildStatCard(
+                        title: "Berat Badan",
+                        subtitle: "Hasil pengukuran fisik",
+                        content: Text(
+                          beratBadan,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Kartu Kontak Darurat
+                _buildStatCard(
+                  title: "Kontak Darurat",
+                  subtitle: "Gunakan bila dalam kondisi mendesak",
+                  titleWidget: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            kontakNama,
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xffeff6ff),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.blueAccent.withOpacity(0.1)),
+                            ),
+                            child: const Text(
+                              "Hubungi",
+                              style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        kontakTelp,
+                        style: const TextStyle(fontSize: 14, color: Colors.blueAccent, fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                 ),
@@ -240,13 +342,13 @@ class DetailPassportPage extends StatelessWidget {
             const SizedBox(height: 12),
           ],
           if (titleWidget != null) ...[
-            const Text("Penyakit Kritis", style: TextStyle(color: Colors.grey, fontSize: 12)),
-            const SizedBox(height: 4),
+            Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            const SizedBox(height: 6),
             titleWidget,
           ] else ...[
             Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xff1e293b))),
           ],
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 10)),
         ],
       ),

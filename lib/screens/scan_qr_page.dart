@@ -17,31 +17,48 @@ class ScanQrPage extends StatefulWidget {
   State<ScanQrPage> createState() => _ScanQrPageState();
 }
 
-class _ScanQrPageState extends State<ScanQrPage> {
+class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateMixin {
   final MobileScannerController _scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
   bool _isProcessing = false;
+  bool _hasDetected = false;
   final String baseUrl = "http://127.0.0.1:8000";
+
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 10, end: 230).animate(_animationController);
+    if (widget.isActive) {
+      _animationController.repeat(reverse: true);
+    }
+  }
 
   @override
   void didUpdateWidget(covariant ScanQrPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive != oldWidget.isActive) {
       if (widget.isActive) {
-        try {
-          _scannerController.start();
-        } catch (_) {}
+        _animationController.repeat(reverse: true);
       } else {
-        try {
-          _scannerController.stop();
-        } catch (_) {}
+        _animationController.stop();
+        setState(() {
+          _hasDetected = false;
+        });
       }
     }
   }
 
   @override
   void dispose() {
+    _animationController.dispose();
     _scannerController.dispose();
     super.dispose();
   }
@@ -52,6 +69,7 @@ class _ScanQrPageState extends State<ScanQrPage> {
 
     setState(() {
       _isProcessing = true;
+      _hasDetected = true;
     });
 
     // stop camera
@@ -206,6 +224,9 @@ class _ScanQrPageState extends State<ScanQrPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
+                    setState(() {
+                      _hasDetected = false;
+                    });
                     Navigator.pop(context);
                     _scannerController.start();
                   },
@@ -332,12 +353,62 @@ class _ScanQrPageState extends State<ScanQrPage> {
           ),
 
           Center(
-            child: Container(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               width: 250,
               height: 250,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.blueAccent, width: 3),
+                border: Border.all(
+                  color: _hasDetected ? Colors.green : Colors.blueAccent, 
+                  width: 3,
+                ),
+                boxShadow: _hasDetected
+                    ? [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.5),
+                          blurRadius: 15,
+                          spreadRadius: 3,
+                        )
+                      ]
+                    : [],
                 borderRadius: BorderRadius.circular(24),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(21),
+                child: Stack(
+                  children: [
+                    if (widget.isActive && !_isProcessing)
+                      AnimatedBuilder(
+                        animation: _animation,
+                        builder: (context, child) {
+                          return Positioned(
+                            top: _animation.value,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              height: 3,
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.blueAccent.withOpacity(0.8),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  )
+                                ],
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.blueAccent,
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

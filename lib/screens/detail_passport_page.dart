@@ -29,9 +29,6 @@ class DetailPassportPage extends StatelessWidget {
     final String tinggiBadan = passportData['height_cm'] != null ? "${passportData['height_cm']} cm" : "-";
     final String beratBadan = passportData['weight_kg'] != null ? "${passportData['weight_kg']} kg" : "-";
 
-    final String kontakNama = passportData['emergency_contact_name'] ?? "-";
-    final String kontakTelp = passportData['emergency_contact_phone'] ?? "-";
-
     final bool hasDisability = disabilitasRaw.isNotEmpty;
     final bool hasCritical = penyakitKritis.toLowerCase() != "tidak ada" && penyakitKritis.isNotEmpty;
 
@@ -275,43 +272,6 @@ class DetailPassportPage extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 16),
-
-                _buildStatCard(
-                  title: "Kontak Darurat",
-                  subtitle: "Gunakan bila dalam kondisi mendesak",
-                  titleWidget: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            kontakNama,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xffeff6ff),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.blueAccent.withOpacity(0.1)),
-                            ),
-                            child: const Text(
-                              "Hubungi",
-                              style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold),
-                            ),
-                          )
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        kontakTelp,
-                        style: const TextStyle(fontSize: 14, color: Colors.blueAccent, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 110),
               ],

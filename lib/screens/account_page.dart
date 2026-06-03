@@ -130,9 +130,9 @@ class _AccountPageState extends State<AccountPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
               title: const Row(
                 children: [
-                  Icon(Icons.manage_accounts_rounded, color: Colors.blueAccent),
-                  SizedBox(width: 8),
-                  Text("Ubah Email & Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                   Icon(Icons.manage_accounts_rounded, color: Colors.blueAccent),
+                   SizedBox(width: 8),
+                   Text("Ubah Email & Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ],
               ),
               content: SingleChildScrollView(
@@ -141,7 +141,7 @@ class _AccountPageState extends State<AccountPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Perbarui informasi email dan password akun Anda di bawah ini:",
+                       "Perbarui informasi email dan password Anda:",
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
@@ -470,7 +470,7 @@ class _AccountPageState extends State<AccountPage> {
                       SizedBox(width: 10),
                       Text(
                         'Ubah Email & Password',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.blueAccent,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -519,7 +519,7 @@ class _AccountPageState extends State<AccountPage> {
                 ),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 120),
 
               const Center(
                 child: Padding(

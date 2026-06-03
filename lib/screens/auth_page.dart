@@ -106,169 +106,206 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 50),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.08),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.shield_outlined,
+                    size: 48,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       _isLogin ? 'Masuk' : 'Daftar',
-                      style: const TextStyle(fontSize: 44, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 28, 
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _isLogin
-                          ? 'Pantau Terus Passport Kesehatanmu!'
-                          : 'Buat akun baru untuk mulai menggunakan layanan passport kesehatan digital.',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 40),
                   ],
                 ),
               ),
-
-              Form(
-                key: _formKey,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Column(
-                    children: [
-                      if (!_isLogin) ...[
-                        TextFormField(
-                          controller: _emailController,
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) => value!.isEmpty ? 'Email tidak boleh kosong' : null,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                        ),
-                      ] else ...[
-                        TextFormField(
-                          controller: _nameEmailBpjsController,
-                          textInputAction: TextInputAction.next,
-                          validator: (value) => value!.isEmpty ? 'Kolom ini wajib diisi' : null,
-                          decoration: InputDecoration(
-                            labelText: 'Nama, Email / No. BPJS',
-                            prefixIcon: const Icon(Icons.person_outlined),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 20),
-
-                      TextFormField(
-                        controller: _passwordController,
-                        textInputAction: TextInputAction.next,
-                        obscureText: _isObscure,
-                        validator: (value) => value!.length < 6 ? 'Sandi minimal 6 karakter' : null,
-                        decoration: InputDecoration(
-                          labelText: 'Kata Sandi',
-                          prefixIcon: const Icon(Icons.lock_outlined),
-                          suffixIcon: IconButton(
-                              onPressed: () => setState(() => _isObscure = !_isObscure),
-                              icon: Icon(_isObscure ? Icons.visibility_off_outlined : Icons.visibility_outlined)),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-
-                      if (!_isLogin) ...[
-                        const SizedBox(height: 20),
-                        TextFormField(
-                          controller: _bpjsController,
-                          textInputAction: TextInputAction.next,
-                          keyboardType: TextInputType.number,
-                          validator: (value) => value!.isEmpty ? 'No.BPJS wajib diisi' : null,
-                          decoration: InputDecoration(
-                            labelText: 'No.BPJS',
-                            prefixIcon: const Icon(Icons.card_membership_outlined),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: IntlPhoneField(
-                                decoration: InputDecoration(
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 18),
-                                  filled: true,
-                                  fillColor: Colors.grey.shade100,
-                                  counterText: '',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                ),
-                                initialCountryCode: 'ID',
-                                disableLengthCheck: true,
-                                dropdownIconPosition: IconPosition.trailing,
-                                flagsButtonPadding: const EdgeInsets.only(left: 8),
-                                style: const TextStyle(fontSize: 16),
-                                onChanged: (phone) {
-                                  _completePhoneNumber = phone.completeNumber;
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              flex: 7,
-                              child: TextFormField(
-                                controller: _noController,
-                                keyboardType: TextInputType.phone,
-                                validator: (value) => value!.isEmpty ? 'No.HP wajib diisi' : null,
-                                decoration: InputDecoration(
-                                  hintText: 'Nomor Telepon',
-                                  filled: true,
-                                  fillColor: Colors.grey.shade100,
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40.0),
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : handleAuthSubmit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 55),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: _isLoading 
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.grey.shade100, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
                       )
-                    : Text(_isLogin ? 'Masuk' : 'Daftar', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(24.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (!_isLogin) ...[
+                          TextFormField(
+                            controller: _emailController,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) => value!.isEmpty ? 'Email tidak boleh kosong' : null,
+                            decoration: InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon: const Icon(Icons.email_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
+                        ] else ...[
+                          TextFormField(
+                            controller: _nameEmailBpjsController,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) => value!.isEmpty ? 'Kolom ini wajib diisi' : null,
+                            decoration: InputDecoration(
+                              labelText: 'Email atau Nomor BPJS',
+                              prefixIcon: const Icon(Icons.person_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+
+                        TextFormField(
+                          controller: _passwordController,
+                          textInputAction: TextInputAction.next,
+                          obscureText: _isObscure,
+                          validator: (value) => value!.length < 6 ? 'Sandi minimal 6 karakter' : null,
+                          decoration: InputDecoration(
+                            labelText: 'Kata Sandi',
+                            prefixIcon: const Icon(Icons.lock_outlined),
+                            suffixIcon: IconButton(
+                                onPressed: () => setState(() => _isObscure = !_isObscure),
+                                icon: Icon(_isObscure ? Icons.visibility_off_outlined : Icons.visibility_outlined)),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+
+                        if (!_isLogin) ...[
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _bpjsController,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.number,
+                            validator: (value) => value!.isEmpty ? 'Nomor BPJS wajib diisi' : null,
+                            decoration: InputDecoration(
+                              labelText: 'Nomor BPJS',
+                              prefixIcon: const Icon(Icons.card_membership_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 4,
+                                child: IntlPhoneField(
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                                    filled: true,
+                                    fillColor: Colors.grey.shade50,
+                                    counterText: '',
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                  ),
+                                  initialCountryCode: 'ID',
+                                  disableLengthCheck: true,
+                                  dropdownIconPosition: IconPosition.trailing,
+                                  flagsButtonPadding: const EdgeInsets.only(left: 8),
+                                  style: const TextStyle(fontSize: 15),
+                                  onChanged: (phone) {
+                                    _completePhoneNumber = phone.completeNumber;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 7,
+                                child: TextFormField(
+                                  controller: _noController,
+                                  keyboardType: TextInputType.phone,
+                                  validator: (value) => value!.isEmpty ? 'Nomor telepon wajib diisi' : null,
+                                  decoration: InputDecoration(
+                                    hintText: 'Nomor Telepon',
+                                    filled: true,
+                                    fillColor: Colors.grey.shade50,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                        const SizedBox(height: 24),
+
+                        ElevatedButton(
+                          onPressed: _isLoading ? null : handleAuthSubmit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                          child: _isLoading 
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : Text(_isLogin ? 'Masuk' : 'Daftar', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(_isLogin ? 'Belum Punya Akun?' : 'Sudah Punya Akun?'),
+                  Text(_isLogin ? 'Belum Punya Akun?' : 'Sudah Punya Akun?', style: const TextStyle(color: Colors.grey)),
                   const SizedBox(width: 8),
                   GestureDetector(
                     onTap: () {
@@ -289,7 +326,7 @@ class _AuthPageState extends State<AuthPage> {
                   )
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
             ],
           ),
         ),

@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'detail_page.dart';
 import 'detail_passport_page.dart'; 
 import 'hospital_list_page.dart'; 
+import 'notifications_history_page.dart';
+import '../widget/notification_helper.dart';
 
 class DashboardPage extends StatefulWidget {
   final String token;
@@ -28,10 +31,20 @@ class _DashboardPageState extends State<DashboardPage> {
 
   List appointments = [];
   List history = [];
+  List todayMedications = [];
 
   List filteredAppointments = [];
   List filteredHistory = [];
   Map<String, dynamic>? filteredMedication;
+  
+  List _prevHistory = [];
+  List _prevAppointments = [];
+  List _prevTodayMedications = [];
+  bool _firstLoadCompleted = false;
+
+  final Set<String> _firedAlarms = {};
+  final Set<String> _firedNotifications = {};
+  Timer? _timer;
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
@@ -43,13 +56,56 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     fetchDashboard();
     _searchController.addListener(_onSearchChanged);
+    _timer = Timer.periodic(const Duration(seconds: 4), (timer) {
+      fetchDashboard();
+      _checkAlarmsAndNotifications();
+    });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _checkAlarmsAndNotifications() {
+    if (!mounted) return;
+
+    final now = DateTime.now();
+    final todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    final currentHourMinute = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+
+    // 1. Check Medication Alarms
+    for (var med in todayMedications) {
+      if (med["remind_at"] == null) continue;
+
+      final String remindAt = med["remind_at"].toString();
+      final String remindHourMinute = remindAt.substring(0, 5);
+
+      if (remindHourMinute == currentHourMinute) {
+        final alarmKey = "${med['medicine_name']}_${remindHourMinute}_$todayStr";
+        if (!_firedAlarms.contains(alarmKey)) {
+          _firedAlarms.add(alarmKey);
+          NotificationHelper.showMedicationAlarm(context, Map<String, dynamic>.from(med));
+        }
+      }
+    }
+
+    // 2. Check Appointment Notifications
+    for (var app in appointments) {
+      if (app["appointment_date"] == null) continue;
+
+      final String appDateStr = app["appointment_date"].toString();
+      if (appDateStr == todayStr) {
+        final notifKey = "appointment_${app['id']}_$todayStr";
+        if (!_firedNotifications.contains(notifKey)) {
+          _firedNotifications.add(notifKey);
+          NotificationHelper.showAppointmentNotification(context, Map<String, dynamic>.from(app));
+        }
+      }
+    }
   }
 
   Future<void> fetchDashboard() async {
@@ -67,17 +123,88 @@ class _DashboardPageState extends State<DashboardPage> {
 
       if (body["status"] == "success") {
         final data = body["data"];
+        
+        final newHistory = data["medical_history"] ?? [];
+        final newAppointments = data["calendar_appointments"] ?? [];
+        final newTodayMedications = data["today_medications"] ?? [];
+
+        if (_firstLoadCompleted) {
+          // Compare history
+          if (_prevHistory.isNotEmpty && newHistory.isNotEmpty) {
+            final newRecord = newHistory.first;
+            final prevRecord = _prevHistory.first;
+            if (newRecord["id"] != prevRecord["id"]) {
+              final String rsName = newRecord["visit"]?["rs_name"] ?? newRecord["rs_name"] ?? "Rumah Sakit";
+              final String diseaseName = newRecord["disease"]?["name"] ?? "Diagnosis baru";
+              NotificationHelper.showInAppNotification(
+                context: context,
+                title: "Rekam Medis Baru Diterima",
+                message: "Hasil pemeriksaan dari $rsName: $diseaseName",
+                icon: Icons.history_edu_rounded,
+                iconColor: const Color(0xff10b981),
+              );
+              NotificationHelper.logNotification(
+                title: "Rekam Medis Baru Diterima",
+                message: "Hasil pemeriksaan dari $rsName: $diseaseName",
+                type: "record_update",
+              );
+            }
+          }
+
+          // Compare appointments
+          if (_prevAppointments.isNotEmpty && newAppointments.length > _prevAppointments.length) {
+            final newApp = newAppointments.last;
+            final String rsName = newApp["rs_name"] ?? "Rumah Sakit";
+            final String notes = newApp["notes"] ?? "Kontrol Medis";
+            NotificationHelper.showInAppNotification(
+              context: context,
+              title: "Jadwal Kontrol Baru",
+              message: "Jadwal di $rsName: $notes",
+              icon: Icons.event_note_rounded,
+              iconColor: Colors.purpleAccent,
+            );
+            NotificationHelper.logNotification(
+              title: "Jadwal Kontrol Baru",
+              message: "Jadwal di $rsName: $notes",
+              type: "appointment",
+            );
+          }
+
+          // Compare medications
+          if (_prevTodayMedications.isNotEmpty && newTodayMedications.length > _prevTodayMedications.length) {
+            final newMed = newTodayMedications.last;
+            final String medName = newMed["medicine_name"] ?? "Obat Baru";
+            final String rules = newMed["rules"] ?? "3 x 1 sehari";
+            NotificationHelper.showInAppNotification(
+              context: context,
+              title: "Alarm Pengingat Obat Aktif",
+              message: "Rutin minum $medName ($rules)",
+              icon: Icons.alarm_on_rounded,
+              iconColor: Colors.orangeAccent,
+            );
+            NotificationHelper.logNotification(
+              title: "Alarm Pengingat Obat Aktif",
+              message: "Rutin minum $medName ($rules)",
+              type: "alarm",
+            );
+          }
+        }
 
         setState(() {
           passport = data["health_passport"];
           medication = data["next_medication_alarm"];
-          appointments = data["calendar_appointments"] ?? [];
-          history = data["medical_history"] ?? [];
+          appointments = newAppointments;
+          history = newHistory;
+          todayMedications = newTodayMedications;
           
           filteredAppointments = List.from(appointments);
           filteredHistory = List.from(history);
           filteredMedication = medication != null ? Map<String, dynamic>.from(medication!) : null;
           
+          _prevHistory = List.from(history);
+          _prevAppointments = List.from(appointments);
+          _prevTodayMedications = List.from(todayMedications);
+          _firstLoadCompleted = true;
           isLoading = false;
         });
         
@@ -221,6 +348,33 @@ class _DashboardPageState extends State<DashboardPage> {
           elevation: 0,
           scrolledUnderElevation: 0,
           automaticallyImplyLeading: false,
+          title: Padding(
+            padding: const EdgeInsets.only(left: 4.0, top: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  passport?["patient_name"] ?? "Pasien",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff1e293b),
+                  ),
+                ),
+                Text(
+                  passport?["no_bpjs"] != null && passport?["no_bpjs"] != ""
+                      ? "BPJS: ${passport?["no_bpjs"]}"
+                      : "BPJS: -",
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 20.0, top: 10.0),
@@ -239,7 +393,16 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.notifications, color: Colors.blueAccent),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NotificationsHistoryPage(),
+                          ),
+                        ).then((_) {
+                          fetchDashboard();
+                        });
+                      },
                     ),
                   ),
                   if (passport?["pending_approval_count"] != null &&
@@ -790,45 +953,272 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return Column(
       children: filteredHistory.map((item) {
-        String statusText = item["patient_status"] ?? "Sembuh";
-        bool isSembuh = statusText.toLowerCase().contains("sembuh") || statusText.toLowerCase() == "sehat";
+        return HistoryCardWidget(item: Map<String, dynamic>.from(item));
+      }).toList(),
+    );
+  }
+}
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
-          child: Row(
+class HistoryCardWidget extends StatefulWidget {
+  final Map<String, dynamic> item;
+  const HistoryCardWidget({super.key, required this.item});
+
+  @override
+  State<HistoryCardWidget> createState() => _HistoryCardWidgetState();
+}
+
+class _HistoryCardWidgetState extends State<HistoryCardWidget> {
+  String _getBulanIndo(int bulan) {
+    const bulanIndo = [
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", 
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+    ];
+    return bulanIndo[bulan - 1];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final item = widget.item;
+    String statusText = item["patient_status"] ?? "Sembuh";
+    Color badgeBgColor = const Color(0xffdcfce7);
+    Color badgeTextColor = const Color(0xff16a34a);
+
+    if (statusText.toLowerCase().contains("jalan")) {
+      badgeBgColor = const Color(0xffe0f2fe);
+      badgeTextColor = const Color(0xff0284c7);
+    } else if (statusText.toLowerCase().contains("inap")) {
+      badgeBgColor = const Color(0xfffee2e2);
+      badgeTextColor = Colors.red;
+    }
+
+    String tanggalFormat = "Bulan Lalu";
+    if (item["created_at"] != null) {
+      DateTime parsedDate = DateTime.parse(item["created_at"]);
+      final hour = parsedDate.hour.toString().padLeft(2, '0');
+      final minute = parsedDate.minute.toString().padLeft(2, '0');
+      tanggalFormat = "${parsedDate.day} ${_getBulanIndo(parsedDate.month)} ${parsedDate.year} $hour:$minute";
+    }
+
+    final String rsName = item["visit"]?["rs_name"] ?? item["rs_name"] ?? "Rumah Sakit Umum";
+    final String doctorName = item["doctor"]?["name"] ?? "-";
+    final String specialist = item["doctor"]?["specialist"] ?? "";
+    final String symptoms = item["symptoms"] ?? "Pemeriksaan rutin";
+    final List appointments = item["appointments"] ?? [];
+    final List medicationSchedules = item["medication_schedules"] ?? item["medicationSchedules"] ?? [];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          )
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          title: Text(
+            item["room"]?["name"] ?? "Klinik Umum",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xff1e293b)),
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item["room"]?["name"] ?? "Klinik Umum",
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xff1e293b)),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(item["disease"]?["name"] ?? "Pemeriksaan rutin", style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                    const SizedBox(height: 6),
-                    Text("Selesai diperiksa", style: TextStyle(color: Colors.grey.shade400, fontSize: 10))
-                  ],
-                ),
+              const SizedBox(height: 2),
+              Text(
+                item["disease"]?["name"] ?? "Pemeriksaan rutin",
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isSembuh ? const Color(0xffdcfce7) : const Color(0xfffee2e2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  statusText,
-                  style: TextStyle(color: isSembuh ? const Color(0xff16a34a) : Colors.red, fontSize: 11, fontWeight: FontWeight.bold),
-                ),
+              const SizedBox(height: 4),
+              Text(
+                "Selesai diperiksa • $tanggalFormat",
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 10),
               )
             ],
           ),
-        );
-      }).toList(),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: badgeBgColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              statusText,
+              style: TextStyle(color: badgeTextColor, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(height: 1, color: Color(0xfff1f5f9)),
+                  const SizedBox(height: 12),
+                  
+                  _buildDetailRow(
+                    icon: Icons.local_hospital_rounded,
+                    label: "Faskes / Rumah Sakit",
+                    value: rsName,
+                  ),
+                  const SizedBox(height: 10),
+
+                  _buildDetailRow(
+                    icon: Icons.person_rounded,
+                    label: "Dokter Penanggung Jawab",
+                    value: specialist.isNotEmpty ? "$doctorName ($specialist)" : doctorName,
+                  ),
+                  const SizedBox(height: 10),
+
+                  _buildDetailRow(
+                    icon: Icons.medical_services_rounded,
+                    label: "Keluhan / Gejala Klinis",
+                    value: symptoms,
+                  ),
+                  
+                  if (medicationSchedules.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Resep Obat & Alarm Pengingat",
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 6),
+                    ...medicationSchedules.map((med) {
+                      final String alarmTime = med["remind_at"] != null 
+                          ? med["remind_at"].toString().substring(0, 5) 
+                          : "--:--";
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xfff8fafc),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xffe2e8f0)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    med["medicine_name"] ?? "-",
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xff334155)),
+                                  ),
+                                  Text(
+                                    med["rules"] ?? "-",
+                                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xfffff7ed),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.alarm, size: 12, color: Colors.orange),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    alarmTime,
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.orange),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
+
+                  if (appointments.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Jadwal Kontrol Kembali",
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 6),
+                    ...appointments.map((apt) {
+                      String aptDateStr = "-";
+                      if (apt["appointment_date"] != null) {
+                        final parsed = DateTime.parse(apt["appointment_date"]);
+                        aptDateStr = "${parsed.day} ${_getBulanIndo(parsed.month)} ${parsed.year}";
+                      }
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 6),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xfff8fafc),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xffe2e8f0)),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.event_note_rounded, size: 16, color: Colors.blueAccent),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    aptDateStr,
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xff334155)),
+                                  ),
+                                  Text(
+                                    apt["notes"] ?? "Kontrol Medis",
+                                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow({required IconData icon, required String label, required String value}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: Colors.grey.shade400),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(fontSize: 13, color: Color(0xff334155), fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

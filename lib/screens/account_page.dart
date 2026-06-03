@@ -8,6 +8,7 @@ import 'auth_page.dart';
 class AccountPage extends StatefulWidget {
   final String token;
 
+  // AccountPage
   const AccountPage({
     super.key,
     required this.token,

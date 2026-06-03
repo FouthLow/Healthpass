@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:healthpass/config.dart';
 
 class ScanQrPage extends StatefulWidget {
   final String token;
@@ -23,7 +24,7 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
   );
   bool _isProcessing = false;
   bool _hasDetected = false;
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = AppConfig.baseUrl;
 
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -328,27 +329,12 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
           else
             Container(color: Colors.black),
 
-          ColorFiltered(
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.5),
-              BlendMode.srcOut,
-            ),
-            child: Stack(
-              children: [
-                Container(
-                  color: Colors.transparent,
-                ),
-                Center(
-                  child: Container(
-                    width: 250,
-                    height: 250,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                ),
-              ],
+          CustomPaint(
+            size: Size.infinite,
+            painter: ScannerOverlayPainter(
+              borderRadius: 24,
+              width: 250,
+              height: 250,
             ),
           ),
 
@@ -520,4 +506,47 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
       ),
     );
   }
+}
+
+class ScannerOverlayPainter extends CustomPainter {
+  final double borderRadius;
+  final double width;
+  final double height;
+
+  ScannerOverlayPainter({
+    this.borderRadius = 24,
+    this.width = 250,
+    this.height = 250,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black.withOpacity(0.5)
+      ..style = PaintingStyle.fill;
+
+    final outerPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    
+    final innerRRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: Offset(size.width / 2, size.height / 2),
+        width: width,
+        height: height,
+      ),
+      Radius.circular(borderRadius),
+    );
+
+    final innerPath = Path()..addRRect(innerRRect);
+
+    final path = Path.combine(
+      PathOperation.difference,
+      outerPath,
+      innerPath,
+    );
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant ScannerOverlayPainter oldDelegate) => false;
 }

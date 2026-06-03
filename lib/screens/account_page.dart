@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:healthpass/config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_page.dart';
 
@@ -26,7 +27,7 @@ class _AccountPageState extends State<AccountPage> {
   String _born = '-';
   String _gender = '-';
 
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = AppConfig.baseUrl;
 
   @override
   void initState() {

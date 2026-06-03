@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:healthpass/config.dart';
 
 class HospitalListPage extends StatefulWidget {
   final String token; 
@@ -18,7 +19,7 @@ class _HospitalListPageState extends State<HospitalListPage> {
   // 1. DATA DUMMY DIHAPUS TOTAL! Sekarang diganti list kosong untuk menampung data asli server
   List<dynamic> _realHospitals = [];
   bool _isLoading = false;
-  final String baseUrl = "http://127.0.0.1:8000"; 
+  final String baseUrl = AppConfig.baseUrl; 
 
   @override
   void initState() {

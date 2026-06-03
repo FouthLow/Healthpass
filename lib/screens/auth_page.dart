@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:http/http.dart' as http;
+import 'package:healthpass/config.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widget/main_navigation.dart';
@@ -27,7 +28,7 @@ class _AuthPageState extends State<AuthPage> {
   final _nameEmailBpjsController = TextEditingController();
   String _completePhoneNumber = '';
 
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = AppConfig.baseUrl;
 
   @override
   void dispose() {

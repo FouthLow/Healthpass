@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:healthpass/config.dart';
 import 'detail_page.dart';
 import 'detail_passport_page.dart'; 
 import 'hospital_list_page.dart'; 
@@ -49,7 +50,7 @@ class _DashboardPageState extends State<DashboardPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
 
-  final String baseUrl = "http://127.0.0.1:8000";
+  final String baseUrl = AppConfig.baseUrl;
 
   @override
   void initState() {

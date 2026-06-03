@@ -21,10 +21,33 @@ class ScanQrPage extends StatefulWidget {
 class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateMixin {
   final MobileScannerController _scannerController = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
+    autoStart: false,
+    formats: [BarcodeFormat.qrCode],
   );
   bool _isProcessing = false;
   bool _hasDetected = false;
   final String baseUrl = AppConfig.baseUrl;
+  bool _isCameraRunning = false;
+
+  Future<void> _startScanner() async {
+    if (_isCameraRunning) return;
+    try {
+      await _scannerController.start();
+      _isCameraRunning = true;
+    } catch (e) {
+      debugPrint("Error starting scanner: $e");
+    }
+  }
+
+  Future<void> _stopScanner() async {
+    if (!_isCameraRunning) return;
+    try {
+      await _scannerController.stop();
+      _isCameraRunning = false;
+    } catch (e) {
+      debugPrint("Error stopping scanner: $e");
+    }
+  }
 
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -39,6 +62,7 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
     _animation = Tween<double>(begin: 10, end: 230).animate(_animationController);
     if (widget.isActive) {
       _animationController.repeat(reverse: true);
+      _startScanner();
     }
   }
 
@@ -48,8 +72,10 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
     if (widget.isActive != oldWidget.isActive) {
       if (widget.isActive) {
         _animationController.repeat(reverse: true);
+        _startScanner();
       } else {
         _animationController.stop();
+        _stopScanner();
         setState(() {
           _hasDetected = false;
         });
@@ -74,7 +100,7 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
     });
 
     // stop camera
-    _scannerController.stop();
+    _stopScanner();
 
     final Uri url = Uri.parse("$baseUrl/api/pasien/qr/verify-scan");
 
@@ -229,7 +255,7 @@ class _ScanQrPageState extends State<ScanQrPage> with SingleTickerProviderStateM
                       _hasDetected = false;
                     });
                     Navigator.pop(context);
-                    _scannerController.start();
+                    _startScanner();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isSuccess ? const Color(0xff16a34a) : const Color(0xffdc2626),

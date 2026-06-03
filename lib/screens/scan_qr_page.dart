@@ -5,10 +5,12 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 class ScanQrPage extends StatefulWidget {
   final String token;
+  final bool isActive;
 
   const ScanQrPage({
     super.key,
     required this.token,
+    this.isActive = false,
   });
 
   @override
@@ -21,6 +23,22 @@ class _ScanQrPageState extends State<ScanQrPage> {
   );
   bool _isProcessing = false;
   final String baseUrl = "http://127.0.0.1:8000";
+
+  @override
+  void didUpdateWidget(covariant ScanQrPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive != oldWidget.isActive) {
+      if (widget.isActive) {
+        try {
+          _scannerController.start();
+        } catch (_) {}
+      } else {
+        try {
+          _scannerController.stop();
+        } catch (_) {}
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -275,16 +293,19 @@ class _ScanQrPageState extends State<ScanQrPage> {
       body: Stack(
         children: [
           // viewfinder
-          MobileScanner(
-            controller: _scannerController,
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
-                final String qrVal = barcodes.first.rawValue!;
-                _verifyQrString(qrVal);
-              }
-            },
-          ),
+          if (widget.isActive)
+            MobileScanner(
+              controller: _scannerController,
+              onDetect: (capture) {
+                final List<Barcode> barcodes = capture.barcodes;
+                if (barcodes.isNotEmpty && barcodes.first.rawValue != null) {
+                  final String qrVal = barcodes.first.rawValue!;
+                  _verifyQrString(qrVal);
+                }
+              },
+            )
+          else
+            Container(color: Colors.black),
 
           ColorFiltered(
             colorFilter: ColorFilter.mode(

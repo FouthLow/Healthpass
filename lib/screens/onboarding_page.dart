@@ -104,7 +104,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
             // Bottom Navigation Area
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 40.0),
+              padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
               child: Column(
                 children: [
                   // Page Indicators
@@ -171,49 +171,62 @@ class _OnboardingPageState extends State<OnboardingPage> {
     required String description,
     required Widget illustration,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Mockup Container
-          Container(
-            height: 240,
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xfff8fafc),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.grey.shade100),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
             ),
-            child: Center(child: illustration),
-          ),
-          const SizedBox(height: 40),
-          
-          // Title
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xff1e293b),
+            child: IntrinsicHeight(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Mockup Container
+                    Container(
+                      height: 200,
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xfff8fafc),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.grey.shade100),
+                      ),
+                      child: Center(child: illustration),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Title
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xff1e293b),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Description
+                    Text(
+                      description,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
-          
-          // Description
-          Text(
-            description,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 
@@ -254,7 +267,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           const SizedBox(height: 16),
           const Text(
-            "Ahmad F. Ahla",
+            "Example Patient",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xff1e293b)),
           ),
           const SizedBox(height: 4),
@@ -288,7 +301,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildAlarmMockup() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -307,9 +320,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
             "Pengingat Medis Hari Ini",
             style: TextStyle(color: Colors.grey, fontSize: 11, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: const Color(0xfffff7ed),
               borderRadius: BorderRadius.circular(12),
@@ -328,13 +341,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     ],
                   ),
                 ),
-                const Text("08:00", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xff1e293b))),
+                const Text("08:00", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xff1e293b))),
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: const Color(0xfff0fdf4),
               borderRadius: BorderRadius.circular(12),
@@ -365,7 +378,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _buildQrMockup() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -382,25 +395,25 @@ class _OnboardingPageState extends State<OnboardingPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.blueAccent.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
                 Icons.qr_code_2_rounded,
-                size: 48,
+                size: 36,
                 color: Colors.blueAccent,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             const Text(
               "Pindai QR Kode",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xff1e293b)),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
               decoration: BoxDecoration(
                 color: const Color(0xffdcfce7),
                 borderRadius: BorderRadius.circular(8),

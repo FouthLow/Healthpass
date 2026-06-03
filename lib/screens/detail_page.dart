@@ -296,6 +296,19 @@ class _HistoryCardWidgetState extends State<HistoryCardWidget> {
     final List appointments = item["appointments"] ?? [];
     final List medicationSchedules = item["medication_schedules"] ?? item["medicationSchedules"] ?? [];
 
+    String obatStr = medicationSchedules.isNotEmpty 
+        ? medicationSchedules.map((m) => m["medicine_name"] ?? "-").join(", ")
+        : "Tidak ada obat";
+
+    String kontrolStr = "Tidak ada";
+    if (appointments.isNotEmpty) {
+      final apt = appointments.first;
+      if (apt["appointment_date"] != null) {
+        final parsed = DateTime.parse(apt["appointment_date"]);
+        kontrolStr = "${parsed.day} ${_getBulanIndo(parsed.month)} ${parsed.year}";
+      }
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -320,16 +333,60 @@ class _HistoryCardWidgetState extends State<HistoryCardWidget> {
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 2),
-              Text(
-                item["disease"]?["name"] ?? "Pemeriksaan rutin",
-                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.local_hospital_outlined, size: 12, color: Colors.blueAccent),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      "$rsName • $tanggalFormat",
+                      style: const TextStyle(color: Color(0xff475569), fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
-              Text(
-                "Selesai diperiksa • $tanggalFormat",
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 10),
-              )
+              Row(
+                children: [
+                  const Icon(Icons.person_outline, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      "Dokter: $doctorName • Diagnosis: ${item["disease"]?["name"] ?? "Pemeriksaan rutin"}",
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.medication_liquid_rounded, size: 12, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      "Obat: $obatStr",
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                    ),
+                  ),
+                ],
+              ),
+              if (appointments.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.event_available_outlined, size: 12, color: Colors.orange),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        "Kontrol Kembali: $kontrolStr",
+                        style: const TextStyle(color: Colors.orange, fontSize: 11, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
           trailing: Container(

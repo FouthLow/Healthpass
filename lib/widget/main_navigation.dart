@@ -14,30 +14,26 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
-  late final List<Widget> _pages;
-
-  @override
-  void initState() {
-    super.initState();
-    _pages = [
-      DashboardPage(
-        token: widget.token,
-        onTabChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-      ),
-      ScanQrPage(token: widget.token),
-      AccountPage(token: widget.token),
-    ];
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          DashboardPage(
+            token: widget.token,
+            onTabChanged: (index) {
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+          ScanQrPage(token: widget.token, isActive: _currentIndex == 1),
+          AccountPage(token: widget.token),
+        ],
+      ),
       floatingActionButton: SizedBox(
         width: 64,
         height: 64,
